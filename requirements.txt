@@ -1,10 +1,8 @@
 av==8.1.0
 gTTS
-matplotlib
 mediapipe
 numpy
 opencv_python
-playsound
 streamlit
 streamlit_webrtc
 tensorflow
