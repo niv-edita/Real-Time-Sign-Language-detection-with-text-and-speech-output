@@ -2,7 +2,7 @@ av==8.1.0
 gTTS
 mediapipe
 numpy
-opencv_python
+opencv-python-headless
 streamlit
 streamlit_webrtc
 tensorflow
