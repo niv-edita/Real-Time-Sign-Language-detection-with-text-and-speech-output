@@ -6,7 +6,6 @@ from streamlit_webrtc import webrtc_streamer, VideoTransformerBase, RTCConfigura
 import av
 
 from gtts import gTTS
-from playsound import playsound
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
@@ -146,13 +145,19 @@ class OpenCVVideoProcessor(VideoProcessorBase):
 
                     if int(start) % 5 == 0:
                         if actions[np.argmax(res)] == 'hello':
-                            os.system("hello.mp3")
+                            tts = gTTS('hello', lang='en')
+                            tts.save('hello.mp3')
+                            os.system('hello.mp3')
 
                         elif actions[np.argmax(res)] == 'thanks':
-                            os.system("thanks.mp3")
+                            tts = gTTS('thank you', lang='en')
+                            tts.save('thanks.mp3')
+                            os.system('thanks.mp3')
 
                         elif actions[np.argmax(res)] == 'iloveyou':
-                            os.system("iloveyou.mp3")
+                            tts = gTTS('i love you', lang='en')
+                            tts.save('iloveyou.mp3')
+                            os.system('iloveyou.mp3')
                     
                     image = prob_viz(res, actions, image, colors)
             
