@@ -148,20 +148,24 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                     if int(start) % 5 == 0:
                         if actions[np.argmax(res)] == 'hello':
                             tts = gTTS(text = 'hello', lang='en')
-                            f = TemporaryFile()
-                            tts.write_to_fp(f)
-                            f.seek(0)
-                            Audio(f.read(), autoplay=True)
+                            tts.save('hello.mp3')
+                            audio_file = open('hello.mp3','rb')
+                            audio_bytes = audio_file.read()
+                            st.audio(audio_bytes)
 
                         elif actions[np.argmax(res)] == 'thanks':
                             tts = gTTS('thank you', lang='en')
-                            # tts.save('thanks.mp3')
-                            # os.system('thanks.mp3')
+                            tts.save('thanks.mp3')
+                            audio_file = open('thanks.mp3','rb')
+                            audio_bytes = audio_file.read()
+                            st.audio(audio_bytes)
 
                         elif actions[np.argmax(res)] == 'iloveyou':
                             tts = gTTS('i love you', lang='en')
-                            # tts.save('iloveyou.mp3')
-                            # os.system('iloveyou.mp3')
+                            tts.save('iloveyou.mp3')
+                            audio_file = open('iloveyou.mp3','rb')
+                            audio_bytes = audio_file.read()
+                            st.audio(audio_bytes)
                     
                     image = prob_viz(res, actions, image, colors)
             
