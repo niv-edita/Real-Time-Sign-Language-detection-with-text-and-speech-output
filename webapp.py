@@ -5,7 +5,7 @@ import tensorflow
 from streamlit_webrtc import webrtc_streamer, RTCConfiguration, VideoProcessorBase, WebRtcMode
 import av
 
-from gtts import gTTS
+import pyttsx3
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
@@ -127,15 +127,17 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                             if len(self.sent) > 0: 
                                 if self.actions[np.argmax(res)] != self.sent[-1]:
                                     self.sent.append(self.actions[np.argmax(res)])
-                                    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
-                                    # file = self.sent[-1]+".mp3"
-                                    # os.system(file)
+                                    engine = pyttsx3.init()
+                                    engine.setProperty("rate", 100)
+                                    engine.say(self.sent[-1])
+                                    engine.runAndWait()
                             
                             else:
                                 self.sent.append(self.actions[np.argmax(res)])
-                                st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
-                                # file = self.sent[-1]+".mp3"
-                                # os.system(file)
+                                engine = pyttsx3.init()
+                                engine.setProperty("rate", 100)
+                                engine.say(self.sent[-1])
+                                engine.runAndWait()
 
                     if len(self.sent) > 5: 
                         self.sent = self.sent[-5:]
