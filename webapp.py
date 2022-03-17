@@ -127,13 +127,15 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                             if len(self.sent) > 0: 
                                 if self.actions[np.argmax(res)] != self.sent[-1]:
                                     self.sent.append(self.actions[np.argmax(res)])
-                                    file = self.sent[-1]+".mp3"
-                                    os.system(file)
+                                    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+                                    # file = self.sent[-1]+".mp3"
+                                    # os.system(file)
                             
                             else:
                                 self.sent.append(self.actions[np.argmax(res)])
-                                file = self.sent[-1]+".mp3"
-                                os.system(file)
+                                st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+                                # file = self.sent[-1]+".mp3"
+                                # os.system(file)
 
                     if len(self.sent) > 5: 
                         self.sent = self.sent[-5:]
