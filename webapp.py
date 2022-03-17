@@ -1,21 +1,16 @@
 import numpy as np
 import cv2
 import streamlit as st
-import tensorflow as tf
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase, RTCConfiguration, VideoProcessorBase, WebRtcMode
+import tensorflow
+from streamlit_webrtc import webrtc_streamer, RTCConfiguration, VideoProcessorBase, WebRtcMode
 import av
 
 from gtts import gTTS
-from tempfile import TemporaryFile
-from IPython.display import Audio
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
-from tensorflow.keras.callbacks import TensorBoard
 
 import os
-from matplotlib import pyplot as plt
-import time
 import mediapipe as mp
 
 
@@ -34,9 +29,6 @@ sentence = []
 predictions = []
 threshold = 0.7
 
-# # to load model
-# np.load('extractedkeypoints.npy')
-# model = tf.keras.models.load_model('action.h5')
 
 def mediapipe_detection(image, model):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) #color conversion
@@ -74,7 +66,6 @@ def extract_keypoints(results):
 
 def load_model(model_path,actions):
     model = Sequential()
-    # Layers
     model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,1662)))
     model.add(LSTM(128, return_sequences=True, activation='relu'))
     model.add(LSTM(64, return_sequences=False, activation='relu'))
@@ -111,7 +102,7 @@ class OpenCVVideoProcessor(VideoProcessorBase):
         ####################################################################################
         with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
             while True:
-                # flip_img = cv2.flip(img,1)
+
                 # Make detections
                 image, results = mediapipe_detection(img, holistic)
                 print(results)
@@ -136,36 +127,17 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                             if len(self.sent) > 0: 
                                 if self.actions[np.argmax(res)] != self.sent[-1]:
                                     self.sent.append(self.actions[np.argmax(res)])
+                                    file = self.sent[-1]+".mp3"
+                                    os.system(file)
+                            
                             else:
                                 self.sent.append(self.actions[np.argmax(res)])
+                                file = self.sent[-1]+".mp3"
+                                os.system(file)
 
                     if len(self.sent) > 5: 
                         self.sent = self.sent[-5:]
-
-                    start = time.process_time()
-                    print(start)
-
-                    if int(start) % 5 == 0:
-                        if actions[np.argmax(res)] == 'hello':
-                            tts = gTTS(text = 'hello', lang='en')
-                            tts.save('hello.mp3')
-                            audio_file = open('hello.mp3','rb')
-                            audio_bytes = audio_file.read()
-                            st.audio(audio_bytes)
-
-                        elif actions[np.argmax(res)] == 'thanks':
-                            tts = gTTS('thank you', lang='en')
-                            tts.save('thanks.mp3')
-                            audio_file = open('thanks.mp3','rb')
-                            audio_bytes = audio_file.read()
-                            st.audio(audio_bytes)
-
-                        elif actions[np.argmax(res)] == 'iloveyou':
-                            tts = gTTS('i love you', lang='en')
-                            tts.save('iloveyou.mp3')
-                            audio_file = open('iloveyou.mp3','rb')
-                            audio_bytes = audio_file.read()
-                            st.audio(audio_bytes)
+                    
                     
                     image = prob_viz(res, actions, image, colors)
             
@@ -177,7 +149,7 @@ class OpenCVVideoProcessor(VideoProcessorBase):
 
 def main():
     # Action Detection Application #
-    st.title("Real Time Action Detection Application")
+    st.title("Real Time Sign Language Recognition Application")
     activities = ["Home", "Action Detection", "About"]
     choice = st.sidebar.selectbox("Select Activity", activities)
     st.sidebar.markdown(
@@ -199,7 +171,7 @@ def main():
 
     elif choice == "Action Detection":
         st.header("Webcam Live Feed")
-        st.write("Click on start to use webcam and detect your signs")
+        st.write("Click on start to use webcam and detect your Signs")
         webrtc_streamer(key="key", mode=WebRtcMode.SENDRECV, rtc_configuration=RTC_CONFIGURATION,
                         video_processor_factory=OpenCVVideoProcessor, 
                         async_processing=True, media_stream_constraints={"video": True, "audio": False}
