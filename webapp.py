@@ -1,16 +1,13 @@
 import numpy as np
 import cv2
 import streamlit as st
-import tensorflow
 from streamlit_webrtc import webrtc_streamer, RTCConfiguration, VideoProcessorBase, WebRtcMode
 import av
 
 import pyttsx3
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
+import tensorflow as tf
 
-import os
 import mediapipe as mp
 
 
@@ -65,17 +62,7 @@ def extract_keypoints(results):
     return np.concatenate([pose, face, lh, rh])
 
 def load_model(model_path,actions):
-    model = Sequential()
-    model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,1662)))
-    model.add(LSTM(128, return_sequences=True, activation='relu'))
-    model.add(LSTM(64, return_sequences=False, activation='relu'))
-    model.add(Dense(64, activation='relu'))
-    model.add(Dense(32, activation='relu'))
-    model.add(Dense(actions.shape[0], activation='softmax'))
-
-    model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-    model.load_weights(model_path)
-
+    model = tf.keras.models.load_model('action.h5')
     return model
 
 colors = [(245,117,16), (117,245,16), (16,117,245)]
