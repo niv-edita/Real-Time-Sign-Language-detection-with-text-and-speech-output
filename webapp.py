@@ -4,7 +4,8 @@ import streamlit as st
 from streamlit_webrtc import webrtc_streamer, RTCConfiguration, VideoProcessorBase, WebRtcMode
 import av
 
-import pyttsx3
+# import pyttsx3
+# from gtts import gTTS
 
 import tensorflow as tf
 
@@ -108,23 +109,29 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                     self.pred.append(np.argmax(res))
                     
                     
-                #3. Viz logic
+                #3. Vizualization and Text To Speech logic
                     if np.unique(self.pred[-10:])[0]==np.argmax(res): 
                         if res[np.argmax(res)] > self.threshold: 
                             if len(self.sent) > 0: 
                                 if self.actions[np.argmax(res)] != self.sent[-1]:
                                     self.sent.append(self.actions[np.argmax(res)])
-                                    engine = pyttsx3.init()
-                                    engine.setProperty("rate", 100)
-                                    engine.say(self.sent[-1])
-                                    engine.runAndWait()
+                                    # engine = pyttsx3.init()
+                                    # engine.setProperty("rate", 100)
+                                    # engine.say(self.sent[-1])
+                                    # engine.runAndWait()
+                        ########## using google text to speech ########
+                                    # text = self.sent[-1]
+                                    # tts = gTTS(text)
+                                    # tts.save(self.sent[-1]+".wav")
+                                    # file = self.sent[-1]+".wav"
+                                    # os.system(file)
                             
                             else:
                                 self.sent.append(self.actions[np.argmax(res)])
-                                engine = pyttsx3.init()
-                                engine.setProperty("rate", 100)
-                                engine.say(self.sent[-1])
-                                engine.runAndWait()
+                                # engine = pyttsx3.init()
+                                # engine.setProperty("rate", 100)
+                                # engine.say(self.sent[-1])
+                                # engine.runAndWait()
 
                     if len(self.sent) > 5: 
                         self.sent = self.sent[-5:]
