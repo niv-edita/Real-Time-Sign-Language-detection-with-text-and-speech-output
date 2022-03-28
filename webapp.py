@@ -115,10 +115,10 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                             if len(self.sent) > 0: 
                                 if self.actions[np.argmax(res)] != self.sent[-1]:
                                     self.sent.append(self.actions[np.argmax(res)])
-                                    engine = pyttsx3.init()
-                                    engine.setProperty("rate", 100)
-                                    engine.say(self.sent[-1])
-                                    engine.runAndWait()
+                                    # engine = pyttsx3.init()
+                                    # engine.setProperty("rate", 100)
+                                    # engine.say(self.sent[-1])
+                                    # engine.runAndWait()
                         ########## using google text to speech ########
                                     # text = self.sent[-1]
                                     # tts = gTTS(text)
@@ -128,10 +128,10 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                             
                             else:
                                 self.sent.append(self.actions[np.argmax(res)])
-                                engine = pyttsx3.init()
-                                engine.setProperty("rate", 100)
-                                engine.say(self.sent[-1])
-                                engine.runAndWait()
+                                # engine = pyttsx3.init()
+                                # engine.setProperty("rate", 100)
+                                # engine.say(self.sent[-1])
+                                # engine.runAndWait()
 
                     if len(self.sent) > 4: 
                         self.sent = self.sent[-4:]
