@@ -4,7 +4,7 @@ import streamlit as st
 from streamlit_webrtc import webrtc_streamer, RTCConfiguration, VideoProcessorBase, WebRtcMode
 import av
 
-# import pyttsx3
+import pyttsx3
 # from gtts import gTTS
 
 import tensorflow as tf
@@ -12,14 +12,14 @@ import tensorflow as tf
 import mediapipe as mp
 
 
-st.set_page_config(page_title="Streamlit WebRTC Action Detection", page_icon="🤖")
+st.set_page_config(page_title="Action Detection", page_icon="🤖")
 RTC_CONFIGURATION = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
 
 mp_drawing = mp.solutions.drawing_utils #drawing utilities
 mp_holistic = mp.solutions.holistic #holistic models
 
-actions = np.array(['hello', 'thanks', 'iloveyou'])
+actions = np.array(['namaste','hello','goodmorning', 'howareyou', 'IamFine', 'thankyou', 'Iamlearning', 'signs', 'iloveyou', 'byebye'])
 
  # 1. New detection variables
 sequence = []
@@ -62,16 +62,16 @@ def extract_keypoints(results):
     face = np.array([[res.x, res.y, res.z] for res in results.face_landmarks.landmark]).flatten() if results.face_landmarks else np.zeros(1404)
     return np.concatenate([pose, face, lh, rh])
 
-def load_model(model_path,actions):
-    model = tf.keras.models.load_model('action.h5')
+def load_model():
+    model = tf.keras.models.load_model('actionmodel.h5')
     return model
 
-colors = [(245,117,16), (117,245,16), (16,117,245)]
+colors = [(245,117,16), (117,245,16), (16,117,245), (235,215,0), (225,0,215), (60,225,50), (35,235,105), (235,20,155), (235,215,90), (225,115,80)]
 def prob_viz(res, actions, input_frame, colors):
     output_frame = input_frame.copy()
     for num, prob in enumerate(res):
         cv2.rectangle(output_frame, (0,60+num*40), (int(prob*100), 90+num*40), colors[num], -1)
-        cv2.putText(output_frame, actions[num], (0, 85+num*40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(output_frame, actions[num], (0, 85+num*40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 1, cv2.LINE_AA)
         
     return output_frame
 
@@ -82,7 +82,7 @@ class OpenCVVideoProcessor(VideoProcessorBase):
         self.sent = sentence
         self.pred = predictions
         self.threshold = threshold
-        self.model = load_model('action.h5',actions)
+        self.model = load_model()
 
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
         img = frame.to_ndarray(format="bgr24")         
@@ -101,9 +101,9 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                 # 2. Prediction logic
                 keypoints = extract_keypoints(results)
                 self.seq.append(keypoints)
-                self.seq = self.seq[-30:]
+                self.seq = self.seq[-20:]
                 
-                if len(self.seq) == 30:
+                if len(self.seq) == 20:
                     res = self.model.predict(np.expand_dims(self.seq, axis=0))[0]
                     print(self.actions[np.argmax(res)])
                     self.pred.append(np.argmax(res))
@@ -115,10 +115,10 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                             if len(self.sent) > 0: 
                                 if self.actions[np.argmax(res)] != self.sent[-1]:
                                     self.sent.append(self.actions[np.argmax(res)])
-                                    # engine = pyttsx3.init()
-                                    # engine.setProperty("rate", 100)
-                                    # engine.say(self.sent[-1])
-                                    # engine.runAndWait()
+                                    engine = pyttsx3.init()
+                                    engine.setProperty("rate", 100)
+                                    engine.say(self.sent[-1])
+                                    engine.runAndWait()
                         ########## using google text to speech ########
                                     # text = self.sent[-1]
                                     # tts = gTTS(text)
@@ -128,20 +128,21 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                             
                             else:
                                 self.sent.append(self.actions[np.argmax(res)])
-                                # engine = pyttsx3.init()
-                                # engine.setProperty("rate", 100)
-                                # engine.say(self.sent[-1])
-                                # engine.runAndWait()
+                                engine = pyttsx3.init()
+                                engine.setProperty("rate", 100)
+                                engine.say(self.sent[-1])
+                                engine.runAndWait()
 
-                    if len(self.sent) > 5: 
-                        self.sent = self.sent[-5:]
+                    if len(self.sent) > 4: 
+                        self.sent = self.sent[-4:]
                     
                     
                     image = prob_viz(res, actions, image, colors)
             
-                cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
-                cv2.putText(image, ' '.join(self.sent), (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-                
+                cv2.rectangle(image, (0,0), (640, 40), (0, 5, 0), -1)
+                cv2.putText(image, ' '.join(sentence), (3,30), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1, cv2.LINE_AA)
+
                 return av.VideoFrame.from_ndarray(image, format="bgr24")
 
 

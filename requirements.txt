@@ -1,9 +1,7 @@
-av==8.1.0
+av
 mediapipe
 numpy
-opencv_python-headless
-pyttsx3
+opencv_python_headless
 streamlit
 streamlit_webrtc
 tensorflow
-tensorflow_gpu
