@@ -2,7 +2,6 @@ av
 mediapipe
 numpy
 opencv_python_headless
-pyttsx3
 streamlit
 streamlit_webrtc
 tensorflow

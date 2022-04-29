@@ -4,15 +4,15 @@ import streamlit as st
 from streamlit_webrtc import webrtc_streamer, RTCConfiguration, VideoProcessorBase, WebRtcMode
 import av
 
-import pyttsx3
+# import pyttsx3
 # from gtts import gTTS
 
 import tensorflow as tf
-
 import mediapipe as mp
 
 
 st.set_page_config(page_title="Action Detection", page_icon="🤖")
+
 RTC_CONFIGURATION = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
 
@@ -116,7 +116,7 @@ class OpenCVVideoProcessor(VideoProcessorBase):
                                 if self.actions[np.argmax(res)] != self.sent[-1]:
                                     self.sent.append(self.actions[np.argmax(res)])
                                     # engine = pyttsx3.init()
-                                    # engine.setProperty("rate", 100)
+                                    # engine.setProperty("rate", 90)
                                     # engine.say(self.sent[-1])
                                     # engine.runAndWait()
                         ########## using google text to speech ########
@@ -141,7 +141,7 @@ class OpenCVVideoProcessor(VideoProcessorBase):
             
                 cv2.rectangle(image, (0,0), (640, 40), (0, 5, 0), -1)
                 cv2.putText(image, ' '.join(sentence), (3,30), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1, cv2.LINE_AA)
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1, cv2.LINE_AA)
 
                 return av.VideoFrame.from_ndarray(image, format="bgr24")
 
