@@ -13,9 +13,6 @@ import mediapipe as mp
 
 st.set_page_config(page_title="Action Detection", page_icon="🤖")
 
-RTC_CONFIGURATION = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
-
-
 mp_drawing = mp.solutions.drawing_utils #drawing utilities
 mp_holistic = mp.solutions.holistic #holistic models
 
@@ -173,6 +170,7 @@ def main():
         st.write("Click on start to use webcam and detect your Signs")
 
         try:
+            RTC_CONFIGURATION = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
             webrtc_streamer(key="key", mode=WebRtcMode.SENDRECV, rtc_configuration=RTC_CONFIGURATION,
                             video_processor_factory=OpenCVVideoProcessor, 
                             async_processing=True, media_stream_constraints={"video": True, "audio": False}
