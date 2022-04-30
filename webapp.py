@@ -171,10 +171,14 @@ def main():
     elif choice == "Action Detection":
         st.header("Webcam Live Feed")
         st.write("Click on start to use webcam and detect your Signs")
-        webrtc_streamer(key="key", mode=WebRtcMode.SENDRECV, rtc_configuration=RTC_CONFIGURATION,
-                        video_processor_factory=OpenCVVideoProcessor, 
-                        async_processing=True, media_stream_constraints={"video": True, "audio": False}
-                        )
+
+        try:
+            webrtc_streamer(key="key", mode=WebRtcMode.SENDRECV, rtc_configuration=RTC_CONFIGURATION,
+                            video_processor_factory=OpenCVVideoProcessor, 
+                            async_processing=True, media_stream_constraints={"video": True, "audio": False}
+                            )
+        except AttributeError:
+            print("attribute error")
 
     elif choice == "About":
         st.subheader("About this app")
