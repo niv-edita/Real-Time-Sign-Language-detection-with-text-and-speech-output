@@ -81,66 +81,69 @@ class OpenCVVideoProcessor(VideoProcessorBase):
         self.threshold = threshold
         self.model = load_model()
 
-    def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
-        img = frame.to_ndarray(format="bgr24")         
+    try:
+        def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
+            img = frame.to_ndarray(format="bgr24")         
 
-        ####################################################################################
-        with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-            while True:
+            ####################################################################################
+            with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+                while True:
 
-                # Make detections
-                image, results = mediapipe_detection(img, holistic)
-                print(results)
-                
-                # Draw landmarks
-                draw_styled_landmarks(image, results)
-                
-                # 2. Prediction logic
-                keypoints = extract_keypoints(results)
-                self.seq.append(keypoints)
-                self.seq = self.seq[-20:]
-                
-                if len(self.seq) == 20:
-                    res = self.model.predict(np.expand_dims(self.seq, axis=0))[0]
-                    print(self.actions[np.argmax(res)])
-                    self.pred.append(np.argmax(res))
+                    # Make detections
+                    image, results = mediapipe_detection(img, holistic)
+                    print(results)
                     
+                    # Draw landmarks
+                    draw_styled_landmarks(image, results)
                     
-                #3. Vizualization and Text To Speech logic
-                    if np.unique(self.pred[-10:])[0]==np.argmax(res): 
-                        if res[np.argmax(res)] > self.threshold: 
-                            if len(self.sent) > 0: 
-                                if self.actions[np.argmax(res)] != self.sent[-1]:
+                    # 2. Prediction logic
+                    keypoints = extract_keypoints(results)
+                    self.seq.append(keypoints)
+                    self.seq = self.seq[-20:]
+                    
+                    if len(self.seq) == 20:
+                        res = self.model.predict(np.expand_dims(self.seq, axis=0))[0]
+                        print(self.actions[np.argmax(res)])
+                        self.pred.append(np.argmax(res))
+                        
+                        
+                    #3. Vizualization and Text To Speech logic
+                        if np.unique(self.pred[-10:])[0]==np.argmax(res): 
+                            if res[np.argmax(res)] > self.threshold: 
+                                if len(self.sent) > 0: 
+                                    if self.actions[np.argmax(res)] != self.sent[-1]:
+                                        self.sent.append(self.actions[np.argmax(res)])
+                                        # engine = pyttsx3.init()
+                                        # engine.setProperty("rate", 90)
+                                        # engine.say(self.sent[-1])
+                                        # engine.runAndWait()
+                            ########## using google text to speech ########
+                                        # text = self.sent[-1]
+                                        # tts = gTTS(text)
+                                        # tts.save(self.sent[-1]+".wav")
+                                        # file = self.sent[-1]+".wav"
+                                        # os.system(file)
+                                
+                                else:
                                     self.sent.append(self.actions[np.argmax(res)])
                                     # engine = pyttsx3.init()
-                                    # engine.setProperty("rate", 90)
+                                    # engine.setProperty("rate", 100)
                                     # engine.say(self.sent[-1])
                                     # engine.runAndWait()
-                        ########## using google text to speech ########
-                                    # text = self.sent[-1]
-                                    # tts = gTTS(text)
-                                    # tts.save(self.sent[-1]+".wav")
-                                    # file = self.sent[-1]+".wav"
-                                    # os.system(file)
-                            
-                            else:
-                                self.sent.append(self.actions[np.argmax(res)])
-                                # engine = pyttsx3.init()
-                                # engine.setProperty("rate", 100)
-                                # engine.say(self.sent[-1])
-                                # engine.runAndWait()
 
-                    if len(self.sent) > 4: 
-                        self.sent = self.sent[-4:]
-                    
-                    
-                    image = prob_viz(res, actions, image, colors)
-            
-                cv2.rectangle(image, (0,0), (640, 40), (0, 5, 0), -1)
-                cv2.putText(image, ' '.join(sentence), (3,30), 
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1, cv2.LINE_AA)
+                        if len(self.sent) > 4: 
+                            self.sent = self.sent[-4:]
+                        
+                        
+                        image = prob_viz(res, actions, image, colors)
+                
+                    cv2.rectangle(image, (0,0), (640, 40), (0, 5, 0), -1)
+                    cv2.putText(image, ' '.join(sentence), (3,30), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1, cv2.LINE_AA)
 
-                return av.VideoFrame.from_ndarray(image, format="bgr24")
+                    return av.VideoFrame.from_ndarray(image, format="bgr24")
+    except AttributeError:
+        print("attribute error")
 
 
 def main():
@@ -151,6 +154,8 @@ def main():
     st.sidebar.markdown(
         """ Developed by Nivedita Rani    
             Email : nivedita.rani2020@vitstudent.ac.in""")
+
+    RTC_CONFIGURATION = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
     if choice == "Home":
         html_temp_home1 = """<div style="background-color:#6D7B8D;padding:10px">
@@ -168,15 +173,10 @@ def main():
     elif choice == "Action Detection":
         st.header("Webcam Live Feed")
         st.write("Click on start to use webcam and detect your Signs")
-
-        try:
-            RTC_CONFIGURATION = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
-            webrtc_streamer(key="key", mode=WebRtcMode.SENDRECV, rtc_configuration=RTC_CONFIGURATION,
+        webrtc_streamer(key="key", mode=WebRtcMode.SENDRECV, rtc_configuration=RTC_CONFIGURATION,
                             video_processor_factory=OpenCVVideoProcessor, 
                             async_processing=True, media_stream_constraints={"video": True, "audio": False}
                             )
-        except AttributeError:
-            print("attribute error")
 
     elif choice == "About":
         st.subheader("About this app")
